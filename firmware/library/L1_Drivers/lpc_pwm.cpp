@@ -1,12 +1,19 @@
 #include "lpc_pwm.h"
 
+
+//a stub until we get the system clock driver files
+int getSystemClock()
+{
+	return 48000000000;
+}
+
 //setMode(1, 5, 0b101);
 void setMode(uint8_t port, uint8_t pin, uint8_t mode)
 {
   io_con_map->con[port][pin] = (io_con_map->con[port][pin] & (0b111)) | (mode & 0b111);
 }
 
-PWM::PWM(bool vPPort, uint8_t vPPin, uint32_t frequencyHz)
+PWM::PWM(uint8_t vPPort, uint8_t vPPin, uint32_t frequencyHz)
 {
 
 	//this saved value will be used to during destructor
@@ -114,7 +121,7 @@ uint32_t PWM::getFrequency()		//stored vs calculate
 	If PWM is set to double edge, it needs to turn on the next PWM channel by calling IOCON
 
 */
-void PWM::setAsDoubleEdge(bool vIsDoubleEdge = true)
+void PWM::setAsDoubleEdge(bool vIsDoubleEdge)
 {
 	isDoubleEdge = vIsDoubleEdge;
 
@@ -123,7 +130,6 @@ void PWM::setAsDoubleEdge(bool vIsDoubleEdge = true)
 		if(isDoubleEdge) //may need a lookup table to activate the pins to PWM mode (for LPC_IOCON)
 		{
 			LPC_PWM0->PCR |= (1 << channel);
-			LPC_IOCON
 		}	
 		else
 		{
