@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <cstdio>
-#include "LPC40xx.h"
+#include "L0_LowLevel/LPC40xx.h"
 
 typedef uint32_t io_con_register;
 
@@ -19,7 +19,7 @@ io_con_map_t * io_con_map = reinterpret_cast<io_con_map_t *>(&IO_CON_LOCAL);
 class PWM
 {
 public:
-	PWM(bool vPPort, uint8_t vPPin, uint32_t frequencyHz = 50);
+	PWM(uint8_t vPPort, uint8_t vPPin, uint32_t frequencyHz = 50);
 	~PWM();
 	void setDutyCycle(float percentage);
 	float getDutyCycle();
