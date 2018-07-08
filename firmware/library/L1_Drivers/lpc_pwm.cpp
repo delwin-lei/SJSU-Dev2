@@ -8,7 +8,6 @@ int getSystemClock()
 }
 
 uint32_t PWM::matchValue = 0;
-
 //setMode(1, 5, 0b101);
 void setMode(uint8_t port, uint8_t pin, uint8_t mode)
 {

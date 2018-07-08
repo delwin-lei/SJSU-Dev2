@@ -5,7 +5,6 @@
 #include <cstdio>
 #include "L0_LowLevel/LPC40xx.h"
 
-
 typedef uint32_t io_con_register;
 
 LPC_IOCON_TypeDef IO_CON_LOCAL = {0};
