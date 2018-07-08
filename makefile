@@ -1,11 +1,11 @@
 # Allow settiing a project name from the environment, default to firmware.
 # Only affects the name of the generated binary.
-# TODO: Set this from the directory this makefile is stored in
+# TODO(#82): Set this from the directory this makefile is stored in
 PROJ    ?= firmware
 # Affects what DBC is generated for SJSUOne board
 ENTITY  ?= DBG
 
-# IMPORTANT: Must be accessible via the PATH variable!!!
+# IMPORTANT: Be sure to source env.sh to access these via the PATH variable.
 DEVICE_CC      = arm-none-eabi-gcc
 DEVICE_CPPC    = arm-none-eabi-g++
 DEVICE_OBJDUMP = arm-none-eabi-objdump
@@ -13,12 +13,12 @@ DEVICE_SIZEC   = arm-none-eabi-size
 DEVICE_OBJCOPY = arm-none-eabi-objcopy
 DEVICE_NM      = arm-none-eabi-nm
 # IMPORTANT: Must be accessible via the PATH variable!!!
-HOST_CC        = gcc
-HOST_CPPC      = g++
-HOST_OBJDUMP   = objdump
-HOST_SIZEC     = size
-HOST_OBJCOPY   = objcopy
-HOST_NM        = nm
+HOST_CC        ?= gcc
+HOST_CPPC      ?= g++
+HOST_OBJDUMP   ?= objdump
+HOST_SIZEC     ?= size
+HOST_OBJCOPY   ?= objcopy
+HOST_NM        ?= nm
 
 ifeq ($(MAKECMDGOALS), test)
 CC      = $(HOST_CC)
@@ -66,28 +66,25 @@ endif
 
 #########
 # FLAGS #
-##########
+#########
 CORTEX_M4F = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
 			 -fabi-version=0
 # CORTEX_M4F  = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -mthumb
 OPTIMIZE  = -O3 -fmessage-length=0 -ffunction-sections -fdata-sections -fno-exceptions \
                -fsingle-precision-constant -fno-rtti
 DEBUG     = -g
-WARNINGS  = -Wall -Wextra -Wpedantic -Wshadow -Wlogical-op -Wfloat-equal \
+WARNINGS  = -Wall -Wextra -Wshadow -Wlogical-op -Wfloat-equal \
             -Wdouble-promotion -Wduplicated-cond -Wlogical-op -Wswitch \
             -Wnull-dereference -Wold-style-cast -Wuseless-cast -Wformat=2 \
             -Wundef -Wconversion -Woverloaded-virtual -Wsuggest-final-types \
             -Wsuggest-final-methods -Wsuggest-override \
             -Wframe-larger-than=1024
-            #-Walloc-zero -Walloc-size-larger-than=8kB -Walloca-larger-than=1
-
 DEFINES   = -DARM_MATH_CM4=1 -D__FPU_PRESENT=1U
-DISABLED_WARNINGS = -Wno-main
+DISABLED_WARNINGS = -Wno-main -Wno-variadic-macros
 COMMON_FLAGS = $(CORTEX_M4F) $(OPTIMIZE) $(DEBUG) $(WARNINGS)  $(DEFINES) \
                $(DISABLED_WARNINGS)
-# end FLAGS
-
 CFLAGS_COMMON = $(COMMON_FLAGS) \
+    -I"$(CURRENT_DIRECTORY)/" \
     -I"$(LIB_DIR)/" \
     -I"$(LIB_DIR)/newlib" \
     -I"$(LIB_DIR)/third_party/" \
@@ -145,7 +142,7 @@ LIBRARY_FILES = $(shell find "$(LIB_DIR)" \
                          -name "*.cpp" \
                          -not -path "$(LIB_DIR)/third_party/*")
 # Remove all test files from LIBRARY_FILES
-LIBRARIES     = $(filter-out $(LIBRARY_TESTS), $(LIBRARY_FILES)) 
+LIBRARIES     = $(filter-out $(LIBRARY_TESTS), $(LIBRARY_FILES))
 SOURCE_FILES  = $(shell find $(SOURCE) \
                           -name "*.c" -o \
                          -name "*.s" -o \
@@ -165,7 +162,7 @@ endif
 # $(patsubst %.cpp,%.o, LIST)    : Replace .cpp -> .o
 # $(patsubst %.c,%.o, LIST)      : Replace .c -> .o
 # $(patsubst src/%,%, LIST)      : Replace src/path/file.o -> path/file.o
-# $(addprefix $(OBJ_DIR)/, LIST) : Add OBJ DIR to path 
+# $(addprefix $(OBJ_DIR)/, LIST) : Add OBJ DIR to path
 #                                  (path/file.o -> obj/path/file.o)
 # NOTE: the extra / for obj_dir is necessary to fully quaify the path from root.
 OBJECT_FILES = $(addprefix $(OBJ_DIR)/, \
@@ -189,7 +186,7 @@ TEST_EXEC  = $(TEST_DIR)/tests.exe
 TEST_FRAMEWORK = $(LIB_DIR)/L5_Testing/testing_frameworks.hpp.gch
 
 # This line allows the make to rebuild if header file #changes
-# This is feature and not a bug. 
+# This is feature and not a bug.
 # Otherwise updates to header files do not
 # register as an update to the source code.
 DEPENDENCIES = $(OBJECT_FILES:.o=.d)
@@ -200,7 +197,7 @@ DEPENDENCIES = $(OBJECT_FILES:.o=.d)
 .DEFAULT_GOAL := default
 # Tell make that these recipes don't have a end product
 .PHONY: build cleaninstall telemetry monitor show-lists clean flash telemetry \
-        default
+        presubmit default
 print-%  : ; @echo $* = $($*)
 
 # When the user types just "make" this should appear to them
@@ -211,7 +208,8 @@ default:
 	@echo "    telemetry     - will launch telemetry interface"
 	@echo "    clean         - cleans project folder"
 	@echo "    cleaninstall  - cleans, builds and installs firmware"
-	@echo "    show-lists - Shows all object files that will be compiled"
+	@echo "    show-lists    - Shows all object files that will be compiled"
+	@echo "    presubmit     - run presubmit script and "
 # Build recipe
 build: $(DBC_DIR) $(OBJ_DIR) $(BIN_DIR) $(SIZE) $(LIST) $(HEX) $(BINARY)
 # Complete rebuild and flash installation#
@@ -386,4 +384,6 @@ $(TEST_EXEC): $(TEST_FRAMEWORK) $(OBJECT_FILES)
         $(LIB_DIR)/L5_Testing/testing_frameworks.hpp
 	@echo 'Finished building: $<'
 	@echo ' '
-	
+
+presubmit:
+	$(TOOLS)/presubmit.sh
