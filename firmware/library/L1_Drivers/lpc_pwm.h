@@ -39,6 +39,8 @@ private:
 	//these will be used to identify which pin on the board is used and will activate that pin to pwm
 	uint8_t pport;		//port number of pin
 	uint8_t ppin;		//pin number
+
+	float dutyCycle;	//duty cycle of pwm 
 };
 
 #endif LPC_PWM_H_
