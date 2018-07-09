@@ -13,6 +13,8 @@ void setMode(uint8_t port, uint8_t pin, uint8_t mode)
   io_con_map->con[port][pin] = (io_con_map->con[port][pin] & (0b111)) | (mode & 0b111);
 }
 
+uint32_t PWM::matchValue = 0;
+
 PWM::PWM(uint8_t vPPort, uint8_t vPPin, uint32_t frequencyHz)
 {
 
@@ -80,16 +82,16 @@ void PWM::setDutyCycle(float percentage)	//will set the respective match registe
 	{
 		return;
 	}
-	uint32_t dutyValue = (percentage * matchValue) / 100;
+	dutyCycle = (percentage * matchValue) / 100;
 
 	switch(channel)
 	{
-		case 1: LPC_PWM1->MR1 = dutyValue;
-		case 2: LPC_PWM1->MR2 = dutyValue;
-		case 3: LPC_PWM1->MR3 = dutyValue;
-		case 4: LPC_PWM1->MR4 = dutyValue;
-		case 5: LPC_PWM1->MR5 = dutyValue;
-		case 6: LPC_PWM1->MR6 = dutyValue;
+		case 1: LPC_PWM1->MR1 = dutyCycle;
+		case 2: LPC_PWM1->MR2 = dutyCycle;
+		case 3: LPC_PWM1->MR3 = dutyCycle;
+		case 4: LPC_PWM1->MR4 = dutyCycle;
+		case 5: LPC_PWM1->MR5 = dutyCycle;
+		case 6: LPC_PWM1->MR6 = dutyCycle;
 		default: return;
 	}
 	LPC_PWM1->LER |= (1 << channel);
@@ -97,7 +99,7 @@ void PWM::setDutyCycle(float percentage)	//will set the respective match registe
 
 float PWM::getDutyCycle()		//will store in a variable? vs calculate it using match register
 {
-
+	return dutyCycle;
 }
 
 void PWM::setFrequency(uint32_t frequencyHz)	//this will set PWMEN = 0, set MR0, and set PWMEN = 1 
@@ -114,12 +116,12 @@ void PWM::setFrequency(uint32_t frequencyHz)	//this will set PWMEN = 0, set MR0,
 
 uint32_t PWM::getFrequency()		//stored vs calculate
 {
-
+	return getSystemClock() / matchValue;
 }
 
 /*
+	*Currently not done*
 	If PWM is set to double edge, it needs to turn on the next PWM channel by calling IOCON
-
 */
 void PWM::setAsDoubleEdge(bool vIsDoubleEdge)
 {
