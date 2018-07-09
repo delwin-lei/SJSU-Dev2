@@ -14,6 +14,8 @@ void setMode(uint8_t port, uint8_t pin, uint8_t mode)
   io_con_map->con[port][pin] = (io_con_map->con[port][pin] & (0b111)) | (mode & 0b111);
 }
 
+uint32_t PWM::matchValue = 0;
+
 PWM::PWM(uint8_t vPPort, uint8_t vPPin, uint32_t frequencyHz)
 {
 
