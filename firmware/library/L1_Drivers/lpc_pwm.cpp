@@ -7,12 +7,6 @@ int getSystemClock()
 	return 48000000000;
 }
 
-//setMode(1, 5, 0b101);
-void setMode(uint8_t port, uint8_t pin, uint8_t mode)
-{
-  io_con_map->con[port][pin] = (io_con_map->con[port][pin] & (0b111)) | (mode & 0b111);
-}
-
 uint32_t PWM::matchValue = 0;
 
 PWM::PWM(uint8_t vPPort, uint8_t vPPin, uint32_t frequencyHz)
@@ -40,13 +34,13 @@ PWM::PWM(uint8_t vPPort, uint8_t vPPin, uint32_t frequencyHz)
 	//sets port to proper function and get pwm channel
 	if(vPPort == 2)
 	{
-		setMode(vPPort, vPPin, 0b001);
+		// setMode(vPPort, vPPin, 0b001);
 		port = vPPort - 1;
 		channel = vPPin + 1;		
 	}
 	else
 	{
-		setMode(vPPort, vPPin, 0b010);
+		// setMode(vPPort, vPPin, 0b010);
 		if(vPPort == 3 && vPPin <= 21)
 		{
 			port = 0;
@@ -73,7 +67,7 @@ PWM::~PWM()	//might need the private variable for double edge to turn off proper
 	{
 		LPC_PWM1->PCR &= ~(1 << (channel+8));
 	}
-	setMode(pport, ppin, 0b000);
+	// setMode(pport, ppin, 0b000);
 }
 
 void PWM::setDutyCycle(float percentage)	//will set the respective match register to [percentage]*MR0
