@@ -14,14 +14,16 @@ uint32_t getSystemClock()
 class PWM
 {
 public:
-	PWM(const uint8_t vPPort, const uint8_t vPPin)
+	PWM(const uint8_t vPPort, const uint8_t vPPin):
+		.pwm(PinConfigure::CreatePinConfigure<vPPort, vPPin>())
 	{
-		pwm = PinConfigure::CreatePinConfigure<vPPort, vPPin>();
+		
 	}
 
 	~PWM()
 	{
-		pwm.SetPinFunction(0b010);
+		//0b000 is GPIO
+		pwm.SetPinFunction(0b000);
 	}
 
 	void Initialize(uint32_t frequencyHz)
@@ -46,6 +48,7 @@ public:
 		//sets port to proper function and get pwm channel
 		if(pwm.getPort() == 2)
 		{
+			//0b010 is PWM
 			pwm.SetPinFunction(0b010);
 			port = 1;
 			channel = pwm.setPin() + 1;		//pwm.getPin()	
@@ -98,8 +101,14 @@ public:
 		return getSystemClock() / matchValue;
 	}
 
-	void setAsDoubleEdge(bool vIsDoubleEdge = true);
-	bool getEdge();
+	void setAsDoubleEdge(bool vIsDoubleEdge = true)
+	{
+		//TODO: Set related registers to double edge mode
+	}
+	bool IsDoubleEdge()
+	{
+		return isDoubleEdge;
+	}
 
 private:
 	PinConfigure pwm;
