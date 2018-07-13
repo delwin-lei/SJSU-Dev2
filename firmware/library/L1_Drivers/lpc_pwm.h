@@ -5,17 +5,6 @@
 #include <cstdio>
 #include "L0_LowLevel/LPC40xx.h"
 
-typedef uint32_t io_con_register;
-
-LPC_IOCON_TypeDef IO_CON_LOCAL = {0};
-
-struct io_con_map_t 
-{
-    io_con_register con[5][32];
-};
-
-io_con_map_t * io_con_map = reinterpret_cast<io_con_map_t *>(&IO_CON_LOCAL);
-
 class PWM
 {
 public:
